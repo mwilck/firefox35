@@ -1,14 +1,19 @@
-FROM sstrigler/squeeze
-# apt-get install fails to configure dbus in the container
-# installing icedtea plugin  causes broken dependencies if
-# update repo is active and updated tzdata is installed
-RUN sed -i '/updates/s/^/#/' /etc/apt/sources.list && \
+FROM debian:squeeze
+
+# debian:squeeze has outdated sources.list
+# Squeeze is only available from archive.debian.org
+COPY sources.list /etc/apt/sources.list
+
+# Installing icedtea plugin causes broken dependencies if
+# id updated tzdata is installed
+RUN \
    apt-get update && \
    apt-get install -y --force-yes --no-install-recommends \
    	   tzdata=2014e-0squeeze1 \
 	   icedtea6-plugin \
 	   iceweasel \
-	   ca-certificates || /bin/true
+	   ca-certificates && \
+   apt-get clean
 
 # For some reason useradd -m fails to create the home dir
 # causing docker build to fail
